@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Styrka</title>
+<meta name="theme-color" content="#F6F4EE">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Styrka">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F4EE;
+  --card:#FFFFFF;
+  --ink:#23324D;
+  --pencil:#9AA3AD;
+  --line:#E3DFD3;
+  --hl:#F8E16C;
+  --hl-soft:#FBEEA9;
+  --blue:#2F54D0;
+  --danger:#B4432F;
+  --radius:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  background-image:repeating-linear-gradient(to bottom, transparent 0 27px, rgba(35,50,77,.035) 27px 28px);
+  color:var(--ink);
+  font-family:'Familjen Grotesk',-apple-system,system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.45;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#app{max-width:480px;margin:0 auto;padding:0 16px 32px}
+button{font-family:inherit;font-size:16px;touch-action:manipulation;cursor:pointer}
+input,select{font-family:inherit;font-size:16px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+/* ---------- topbar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:10;
+  display:flex;align-items:center;gap:10px;
+  padding:calc(14px + env(safe-area-inset-top)) 0 12px;
+  background:linear-gradient(var(--paper) 85%, transparent);
+}
+.topbar h1{font-size:26px;font-weight:700;margin:0;letter-spacing:-.01em}
+.topbar .sub{font-size:14px;color:var(--pencil);margin-left:auto}
+.hl-underline{
+  background:linear-gradient(transparent 62%, var(--hl) 62%, var(--hl) 94%, transparent 94%);
+  padding:0 2px;
+}
+.back{
+  border:1.5px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:10px;width:40px;height:40px;font-size:20px;line-height:1;
+  display:flex;align-items:center;justify-content:center;flex:none;
+}
+
+/* ---------- week strip ---------- */
+.week{
+  display:flex;gap:6px;justify-content:space-between;
+  background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);
+  padding:12px 14px;margin-bottom:8px;
+}
+.week .day{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+.week .lbl{font-size:12px;color:var(--pencil);font-weight:600;text-transform:uppercase}
+.week .dot{
+  width:22px;height:22px;border-radius:7px 9px 6px 10px;
+  border:1.5px dashed var(--line);
+}
+.week .dot.done{background:var(--hl);border:none;transform:rotate(-3deg)}
+.week .day:nth-child(even) .dot.done{transform:rotate(3deg)}
+.week .day.today .lbl{color:var(--ink)}
+.week .day.today .dot:not(.done){border-color:var(--ink)}
+.weekcount{font-size:14px;color:var(--pencil);margin:0 2px 18px}
+.weekcount b{color:var(--ink)}
+
+/* ---------- cards / lists ---------- */
+.card{
+  background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);
+  padding:16px;margin-bottom:12px;
+}
+.tcard{width:100%;text-align:left;display:block}
+.tcard:active{transform:scale(.985)}
+.tcard .name{font-size:19px;font-weight:600;margin:0 0 2px}
+.tcard .meta{font-size:14px;color:var(--pencil)}
+.section-label{
+  font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--pencil);margin:22px 2px 10px;
+}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:block;width:100%;padding:14px;border-radius:12px;
+  border:none;background:var(--ink);color:#fff;font-weight:600;font-size:17px;
+}
+.btn:active{opacity:.85}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink);font-weight:500}
+.btn.danger{background:transparent;border:1.5px solid var(--line);color:var(--danger);font-weight:500}
+.btnrow{display:flex;gap:10px}
+.btnrow .btn{flex:1}
+.linkrow{display:flex;gap:10px;margin-top:20px}
+.linkrow .btn{flex:1}
+
+/* ---------- run view ---------- */
+.runhead{display:flex;align-items:baseline;justify-content:space-between;margin:4px 2px 14px}
+.runhead .progress{font-size:14px;color:var(--pencil)}
+.ex{margin-bottom:14px}
+.ex .exname{font-size:18px;font-weight:600;margin:0}
+.ex .exmeta{font-size:14px;color:var(--pencil);margin:1px 0 10px}
+.pills{display:flex;flex-wrap:wrap;gap:10px}
+.pill{
+  min-width:56px;height:48px;padding:0 8px;
+  border:1.5px dashed var(--pencil);border-radius:8px 12px 7px 11px;
+  background:transparent;color:var(--pencil);
+  font-family:'IBM Plex Mono',monospace;font-size:18px;font-style:italic;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.pill.logged{
+  background:var(--hl);border:none;color:var(--ink);
+  font-style:normal;font-weight:600;transform:rotate(-1.5deg);
+}
+.pill.logged:nth-child(even){transform:rotate(1.5deg)}
+.pill.active{border:1.5px solid var(--ink);color:var(--ink)}
+.pill.logged.active{outline:2px solid var(--ink);outline-offset:2px}
+.stepper{
+  display:flex;align-items:center;gap:10px;margin-top:12px;
+  background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:10px;
+}
+.stepper .adj{
+  width:56px;height:52px;flex:none;border-radius:10px;border:1.5px solid var(--line);
+  background:var(--card);font-size:26px;color:var(--ink);
+}
+.stepper .val{
+  flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;
+  font-size:30px;font-weight:600;
+}
+.stepper .okbtn{
+  flex:none;height:52px;padding:0 18px;border-radius:10px;border:none;
+  background:var(--ink);color:#fff;font-weight:600;
+}
+.stepper .clear{
+  flex:none;width:44px;height:52px;border-radius:10px;border:none;background:transparent;
+  color:var(--pencil);font-size:20px;
+}
+.runfoot{margin-top:24px}
+
+/* ---------- summary ---------- */
+.bignum{font-family:'IBM Plex Mono',monospace;font-size:44px;font-weight:600;margin:4px 0}
+.diff{font-size:16px}
+.diff.up{color:#2E7D46}
+.summary-ex{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:15px}
+.summary-ex:last-child{border-bottom:none}
+.summary-ex .reps{font-family:'IBM Plex Mono',monospace;color:var(--pencil)}
+
+/* ---------- history ---------- */
+.weekgroup{margin-bottom:6px}
+.session{width:100%;text-align:left}
+.session .top{display:flex;justify-content:space-between;align-items:baseline}
+.session .date{font-size:14px;color:var(--pencil)}
+.session .detail{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+
+/* ---------- editor ---------- */
+.field{margin-bottom:12px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--pencil);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.field input[type=text],.field input[type=number]{
+  width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;
+  background:var(--card);color:var(--ink);
+}
+.exedit{position:relative}
+.exedit .rowgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.exedit .tools{display:flex;gap:8px;margin-top:10px}
+.exedit .tools button{
+  border:1.5px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:9px;padding:7px 12px;font-size:14px;
+}
+.exedit .tools .del{color:var(--danger);margin-left:auto}
+.checkline{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:15px}
+.checkline input{width:20px;height:20px;accent-color:var(--ink)}
+
+.empty{color:var(--pencil);text-align:center;padding:32px 8px;font-size:15px}
+
+/* ---------- in-app-dialog ---------- */
+.overlay{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(35,50,77,.35);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.dialog{
+  background:var(--card);border-radius:var(--radius);border:1.5px solid var(--line);
+  padding:20px;max-width:340px;width:100%;
+}
+.dialog p{margin:0 0 16px;font-size:17px}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+
+/* ================= lagring ================= */
+const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+const mark = (k) => { try { localStorage.setItem(k, '1'); } catch(e){} };
+const uid  = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(16).slice(2));
+
+const K = { T:'styrka.templates', S:'styrka.sessions', A:'styrka.active', SEED:'styrka.seeded' };
+
+function seed(){
+  if (load(K.SEED, null) !== null || getTemplates().length) { mark(K.SEED); return; }
+  const mk = (name, note, exs) => ({ id:uid(), name, note, exercises: exs.map(e => ({ id:uid(), name:e[0], sets:e[1], target:e[2], perSide:!!e[3] })) });
+  save(K.T, [
+    mk('Pass A – Drag & bål', 'ca 30 min', [
+      ['Chins', 4, '5–8'],
+      ['Band-rodd', 3, '10–12'],
+      ['Ab-roller', 3, '8–10'],
+      ['Pallof press', 2, '10 /sida', true],
+    ]),
+    mk('Pass B – Press & ben', 'ca 30 min', [
+      ['Armhävningar', 4, '12–15'],
+      ['Band-axelpress', 3, '10–12'],
+      ['Bulgarian split squats', 3, '8–10 /ben', true],
+      ['Enbens höftlyft', 2, '10–12 /ben', true],
+    ]),
+    mk('Pass C – Kort bål', 'ca 15 min, valfritt', [
+      ['Hollow hold', 3, '30–45 sek'],
+      ['Sidoplanka', 2, '30 sek /sida', true],
+      ['Ab-roller', 2, '8–10'],
+      ['Band good mornings', 2, '12–15'],
+    ]),
+  ]);
+  mark(K.SEED);
+}
+
+const getTemplates = () => load(K.T, []);
+const getSessions  = () => load(K.S, []);
+
+/* ================= hjälpare ================= */
+const fmtDate = iso => new Date(iso).toLocaleDateString('sv-SE', { weekday:'short', day:'numeric', month:'short' });
+const localKey = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+const dayKey  = iso => localKey(new Date(iso));
+
+function isoWeek(d){
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dow = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - dow);
+  const y0 = new Date(Date.UTC(t.getUTCFullYear(),0,1));
+  return { week: Math.ceil((((t - y0) / 86400000) + 1) / 7), year: t.getUTCFullYear() };
+}
+
+function lastSessionFor(tId){
+  const s = getSessions().filter(x => x.tId === tId);
+  return s.length ? s[s.length - 1] : null;
+}
+function lastRepsFor(tId, exName){
+  const s = lastSessionFor(tId);
+  if (!s) return null;
+  const ex = s.ex.find(e => e.name === exName);
+  return ex ? ex.sets : null;
+}
+const totalReps = session => session.ex.reduce((a,e) => a + e.sets.reduce((b,v) => b + (v||0), 0), 0);
+const setsLogged = session => session.ex.reduce((a,e) => a + e.sets.filter(v => v != null).length, 0);
+const setsTotal  = session => session.ex.reduce((a,e) => a + e.sets.length, 0);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ================= state ================= */
+let view = 'home';
+let active = load(K.A, null);      // pågående pass
+let stepKey = null;                 // "exIdx:setIdx" för öppen stepper
+let editDraft = null;               // mall som redigeras
+let editError = null;               // valideringsfel i redigeraren
+let lastSummary = null;
+let openSessions = {};              // expanderade i historiken
+let modal = null;                   // in-app-bekräftelse {msg, yes, cb}
+
+const $app = document.getElementById('app');
+function go(v){ view = v; stepKey = null; editError = null; window.scrollTo(0,0); render(); }
+
+/* in-app-bekräftelse – ersätter confirm() som blockeras i standalone-läge */
+function ask(msg, yes, cb){ modal = { msg, yes, cb }; render(); }
+function modalYes(){ const cb = modal && modal.cb; modal = null; if (cb) cb(); else render(); }
+function modalNo(){ modal = null; render(); }
+function renderModal(){
+  if (!modal) return;
+  $app.insertAdjacentHTML('beforeend', `
+    <div class="overlay">
+      <div class="dialog">
+        <p>${esc(modal.msg)}</p>
+        <div class="btnrow">
+          <button class="btn ghost" onclick="App.modalNo()">Avbryt</button>
+          <button class="btn" onclick="App.modalYes()">${esc(modal.yes)}</button>
+        </div>
+      </div>
+    </div>`);
+}
+
+/* ================= vyer ================= */
+function render(){
+  try {
+    if (view === 'home') renderHome();
+    else if (view === 'run') renderRun();
+    else if (view === 'done') renderDone();
+    else if (view === 'history') renderHistory();
+    else if (view === 'edit') renderEdit();
+    else if (view === 'editTemplate') renderEditTemplate();
+    renderModal();
+  } catch(err){
+    $app.innerHTML = `<div class="topbar"><h1>Hoppsan</h1></div>
+      <div class="card"><p style="margin:0 0 12px">Något gick fel vid ritningen av vyn (${esc(err.message)}).</p>
+      <button class="btn ghost" onclick="App.recover()">Rensa pågående pass och gå till start</button></div>`;
+  }
+}
+function recover(){ active = null; save(K.A, null); modal = null; editDraft = null; go('home'); }
+
+/* ---------- hem ---------- */
+function renderHome(){
+  const sessions = getSessions();
+  const now = new Date();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((now.getDay()+6)%7)); mon.setHours(0,0,0,0);
+  const dayLabels = ['M','T','O','T','F','L','S'];
+  const doneDays = new Set(sessions.map(s => dayKey(s.start)));
+  let weekHtml = '';
+  let weekCount = 0;
+  for (let i=0;i<7;i++){
+    const d = new Date(mon); d.setDate(mon.getDate()+i);
+    const key = localKey(d);
+    const isDone = doneDays.has(key);
+    if (isDone) weekCount++;
+    const isToday = key === localKey(now);
+    weekHtml += `<div class="day${isToday?' today':''}"><span class="lbl">${dayLabels[i]}</span><span class="dot${isDone?' done':''}"></span></div>`;
+  }
+
+  const templates = getTemplates();
+  const cards = templates.map(t => {
+    const last = lastSessionFor(t.id);
+    const meta = `${t.exercises.length} övningar${t.note ? ' · ' + esc(t.note) : ''} · senast: ${last ? fmtDate(last.start) : 'aldrig'}`;
+    return `<button class="card tcard" onclick="App.startRun('${t.id}')">
+      <p class="name">${esc(t.name)}</p>
+      <span class="meta">${meta}</span>
+    </button>`;
+  }).join('') || `<div class="empty">Inga pass ännu. Skapa en mall under Redigera.</div>`;
+
+  const resume = active ? `<button class="btn" style="margin-bottom:16px" onclick="App.resume()">Fortsätt pågående pass – ${esc(active.name)}</button>` : '';
+
+  $app.innerHTML = `
+    <div class="topbar"><h1><span class="hl-underline">Styrka</span></h1><span class="sub">${now.toLocaleDateString('sv-SE',{weekday:'long', day:'numeric', month:'long'})}</span></div>
+    <div class="week">${weekHtml}</div>
+    <p class="weekcount"><b>${weekCount} pass</b> den här veckan</p>
+    ${resume}
+    <div class="section-label">Starta pass</div>
+    ${cards}
+    <div class="linkrow">
+      <button class="btn ghost" onclick="App.go('history')">Historik</button>
+      <button class="btn ghost" onclick="App.go('edit')">Redigera mallar</button>
+    </div>`;
+}
+
+/* ---------- kör pass ---------- */
+function startRun(tId){
+  if (active && active.tId !== tId){
+    ask('Du har ett pågående pass. Kasta det och starta nytt?', 'Starta nytt', () => {
+      active = null; save(K.A, null); startRun(tId);
+    });
+    return;
+  }
+  if (!active){
+    const t = getTemplates().find(x => x.id === tId);
+    if (!t) return;
+    active = {
+      id: uid(), tId: t.id, name: t.name, start: new Date().toISOString(),
+      ex: t.exercises.map(e => ({ name:e.name, target:e.target, perSide:e.perSide, sets:Array(e.sets).fill(null) }))
+    };
+    save(K.A, active);
+  }
+  go('run');
+}
+function resume(){ if (active) go('run'); }
+
+function renderRun(){
+  if (!active) return go('home');
+  const exHtml = active.ex.map((e, ei) => {
+    const last = lastRepsFor(active.tId, e.name);
+    const pills = e.sets.map((v, si) => {
+      const key = ei + ':' + si;
+      const ghost = (last && last[si] != null) ? last[si] : '–';
+      const cls = 'pill' + (v != null ? ' logged' : '') + (stepKey === key ? ' active' : '');
+      return `<button class="${cls}" onclick="App.tapSet(${ei},${si})">${v != null ? v : ghost}</button>`;
+    }).join('');
+    let stepper = '';
+    if (stepKey && stepKey.split(':')[0] == ei){
+      const si = +stepKey.split(':')[1];
+      const v = active.ex[ei].sets[si];
+      stepper = `<div class="stepper">
+        <button class="adj" onclick="App.adj(-1)">−</button>
+        <span class="val">${v != null ? v : '–'}</span>
+        <button class="adj" onclick="App.adj(1)">+</button>
+        <button class="clear" title="Rensa set" onclick="App.clearSet()">✕</button>
+        <button class="okbtn" onclick="App.nextSet()">Nästa</button>
+      </div>`;
+    }
+    return `<div class="card ex">
+      <p class="exname">${esc(e.name)}</p>
+      <p class="exmeta">${e.sets.length} set · mål ${esc(e.target || '–')}${last ? '' : ' · första gången'}</p>
+      <div class="pills">${pills}</div>
+      ${stepper}
+    </div>`;
+  }).join('');
+
+  $app.innerHTML = `
+    <div class="topbar">
+      <button class="back" onclick="App.go('home')">‹</button>
+      <h1 style="font-size:20px">${esc(active.name)}</h1>
+      <span class="sub">${setsLogged(active)}/${setsTotal(active)} set</span>
+    </div>
+    ${exHtml}
+    <div class="runfoot">
+      <button class="btn" onclick="App.finish()">Avsluta pass</button>
+      <div style="height:10px"></div>
+      <button class="btn danger" onclick="App.abort()">Avbryt utan att spara</button>
+    </div>`;
+}
+
+function tapSet(ei, si){
+  const key = ei + ':' + si;
+  const e = active.ex[ei];
+  if (e.sets[si] == null){
+    const last = lastRepsFor(active.tId, e.name);
+    let pre = null;
+    if (last && last[si] != null) pre = last[si];
+    else if (last && last[0] != null) pre = last[0];
+    else {
+      const m = String(e.target||'').match(/\d+/);
+      pre = m ? +m[0] : 8;
+    }
+    e.sets[si] = pre;
+  }
+  stepKey = (stepKey === key) ? null : key;
+  save(K.A, active);
+  render();
+}
+function adj(d){
+  if (!stepKey) return;
+  const [ei, si] = stepKey.split(':').map(Number);
+  const cur = active.ex[ei].sets[si];
+  active.ex[ei].sets[si] = Math.max(0, (cur ?? 0) + d);
+  save(K.A, active);
+  render();
+}
+function clearSet(){
+  if (!stepKey) return;
+  const [ei, si] = stepKey.split(':').map(Number);
+  active.ex[ei].sets[si] = null;
+  stepKey = null;
+  save(K.A, active);
+  render();
+}
+function nextSet(){
+  if (!stepKey) return;
+  const [ei, si] = stepKey.split(':').map(Number);
+  const e = active.ex[ei];
+  const nxt = e.sets.findIndex((v, i) => v == null && i > si);
+  if (nxt !== -1){ tapSet(ei, nxt); return; }
+  const any = e.sets.findIndex(v => v == null);
+  if (any !== -1){ tapSet(ei, any); return; }
+  stepKey = null;
+  render();
+}
+
+function finish(){
+  if (setsLogged(active) === 0){
+    ask('Inga set loggade. Kasta passet?', 'Kasta passet', () => {
+      active = null; save(K.A, null); go('home');
+    });
+    return;
+  }
+  active.end = new Date().toISOString();
+  const prev = lastSessionFor(active.tId);
+  const sessions = getSessions();
+  sessions.push(active);
+  save(K.S, sessions);
+  lastSummary = {
+    session: active,
+    prevTotal: prev ? totalReps(prev) : null,
+  };
+  active = null; save(K.A, null);
+  go('done');
+}
+function abort(){
+  ask('Kasta hela passet utan att spara?', 'Kasta passet', () => {
+    active = null; save(K.A, null); go('home');
+  });
+}
+
+/* ---------- sammanfattning ---------- */
+function renderDone(){
+  if (!lastSummary) return go('home');
+  const s = lastSummary.session;
+  const tot = totalReps(s);
+  const mins = s.end ? Math.max(1, Math.round((new Date(s.end) - new Date(s.start)) / 60000)) : null;
+  let diff = '<span class="diff">Första passet med den här mallen – nu finns det en baslinje.</span>';
+  if (lastSummary.prevTotal != null){
+    const d = tot - lastSummary.prevTotal;
+    diff = d > 0 ? `<span class="diff up">+${d} reps sen förra gången</span>`
+         : d < 0 ? `<span class="diff">${d} reps sen förra gången</span>`
+         : `<span class="diff">Samma volym som förra gången</span>`;
+  }
+  const rows = s.ex.map(e => `<div class="summary-ex"><span>${esc(e.name)}</span><span class="reps">${e.sets.map(v => v ?? '·').join(' / ')}</span></div>`).join('');
+  $app.innerHTML = `
+    <div class="topbar"><h1><span class="hl-underline">Klart!</span></h1></div>
+    <div class="card">
+      <p class="exmeta" style="margin:0">${esc(s.name)} · ${fmtDate(s.start)}${mins ? ' · ' + mins + ' min' : ''}</p>
+      <p class="bignum">${tot} <span style="font-size:18px;font-weight:400">reps totalt</span></p>
+      ${diff}
+    </div>
+    <div class="card">${rows}</div>
+    <button class="btn" onclick="App.go('home')">Till start</button>`;
+}
+
+/* ---------- historik ---------- */
+function renderHistory(){
+  const sessions = getSessions().slice().reverse();
+  let html = '';
+  if (!sessions.length){
+    html = `<div class="empty">Inget loggat ännu. Kör ditt första pass så börjar historiken här.</div>`;
+  } else {
+    let curKey = null;
+    sessions.forEach(s => {
+      const d = new Date(s.start);
+      const w = isoWeek(d);
+      const wk = w.year + '-' + w.week;
+      if (wk !== curKey){
+        curKey = wk;
+        const count = sessions.filter(x => { const xw = isoWeek(new Date(x.start)); return (xw.year + '-' + xw.week) === wk; }).length;
+        html += `<div class="section-label">v. ${w.week} · ${count} pass</div>`;
+      }
+      const open = openSessions[s.id];
+      const detail = open ? `<div class="detail">
+          ${s.ex.map(e => `<div class="summary-ex"><span>${esc(e.name)}</span><span class="reps">${e.sets.map(v => v ?? '·').join(' / ')}</span></div>`).join('')}
+          <div style="height:8px"></div>
+          <button class="btn danger" style="padding:9px" onclick="event.stopPropagation();App.deleteSession('${s.id}')">Ta bort passet</button>
+        </div>` : '';
+      html += `<div class="card session" style="cursor:pointer" onclick="App.toggleSession('${s.id}')">
+        <div class="top"><b>${esc(s.name)}</b><span class="date">${fmtDate(s.start)}</span></div>
+        <span class="meta" style="font-size:14px;color:var(--pencil)">${totalReps(s)} reps · ${setsLogged(s)} set</span>
+        ${detail}
+      </div>`;
+    });
+  }
+  $app.innerHTML = `
+    <div class="topbar"><button class="back" onclick="App.go('home')">‹</button><h1>Historik</h1></div>
+    ${html}`;
+}
+function toggleSession(id){ openSessions[id] = !openSessions[id]; render(); }
+function deleteSession(id){
+  ask('Ta bort det här passet ur historiken?', 'Ta bort', () => {
+    save(K.S, getSessions().filter(s => s.id !== id));
+    render();
+  });
+}
+
+/* ---------- mall-lista ---------- */
+function renderEdit(){
+  const cards = getTemplates().map(t => `
+    <button class="card tcard" onclick="App.editTemplate('${t.id}')">
+      <p class="name">${esc(t.name)}</p>
+      <span class="meta">${t.exercises.length} övningar · tryck för att redigera</span>
+    </button>`).join('') || `<div class="empty">Inga mallar.</div>`;
+  $app.innerHTML = `
+    <div class="topbar"><button class="back" onclick="App.go('home')">‹</button><h1>Mallar</h1></div>
+    ${cards}
+    <button class="btn ghost" onclick="App.editTemplate(null)">+ Ny mall</button>`;
+}
+
+/* ---------- redigera mall ---------- */
+function editTemplate(id){
+  if (id){
+    const t = getTemplates().find(x => x.id === id);
+    editDraft = JSON.parse(JSON.stringify(t));
+  } else {
+    editDraft = { id: uid(), name:'', note:'', exercises:[{ id:uid(), name:'', sets:3, target:'8–10', perSide:false }], isNew:true };
+  }
+  go('editTemplate');
+}
+
+function renderEditTemplate(){
+  const t = editDraft;
+  if (!t) return go('edit');
+  const exs = t.exercises.map((e, i) => `
+    <div class="card exedit">
+      <div class="field"><label>Övning</label>
+        <input type="text" value="${esc(e.name)}" placeholder="t.ex. Chins" oninput="App.draftEx(${i},'name',this.value)"></div>
+      <div class="rowgrid">
+        <div class="field" style="margin:0"><label>Set</label>
+          <input type="number" min="1" max="10" value="${e.sets}" oninput="App.draftEx(${i},'sets',this.value)"></div>
+        <div class="field" style="margin:0"><label>Mål (reps/tid)</label>
+          <input type="text" value="${esc(e.target)}" placeholder="8–10" oninput="App.draftEx(${i},'target',this.value)"></div>
+      </div>
+      <label class="checkline"><input type="checkbox" ${e.perSide?'checked':''} onchange="App.draftEx(${i},'perSide',this.checked)"> Per sida/ben</label>
+      <div class="tools">
+        <button onclick="App.moveEx(${i},-1)" ${i===0?'disabled':''}>↑</button>
+        <button onclick="App.moveEx(${i},1)" ${i===t.exercises.length-1?'disabled':''}>↓</button>
+        <button class="del" onclick="App.removeEx(${i})">Ta bort</button>
+      </div>
+    </div>`).join('');
+
+  $app.innerHTML = `
+    <div class="topbar"><button class="back" onclick="App.go('edit')">‹</button><h1>${t.isNew ? 'Ny mall' : 'Redigera'}</h1></div>
+    <div class="card">
+      <div class="field"><label>Namn</label>
+        <input type="text" value="${esc(t.name)}" placeholder="t.ex. Pass D" oninput="App.draftField('name',this.value)"></div>
+      <div class="field" style="margin:0"><label>Notering</label>
+        <input type="text" value="${esc(t.note||'')}" placeholder="t.ex. ca 30 min" oninput="App.draftField('note',this.value)"></div>
+    </div>
+    <div class="section-label">Övningar</div>
+    ${exs}
+    <button class="btn ghost" onclick="App.addEx()">+ Lägg till övning</button>
+    ${editError ? `<p style="color:var(--danger);font-size:15px;margin:14px 2px 0">${esc(editError)}</p>` : ''}
+    <div style="height:20px"></div>
+    <button class="btn" onclick="App.saveTemplate()">Spara mall</button>
+    ${t.isNew ? '' : `<div style="height:10px"></div><button class="btn danger" onclick="App.deleteTemplate()">Ta bort hela mallen</button>`}`;
+}
+
+function draftField(f, v){ editDraft[f] = v; editError = null; }
+function draftEx(i, f, v){
+  if (f === 'sets') v = Math.max(1, Math.min(10, parseInt(v) || 1));
+  editDraft.exercises[i][f] = v;
+  editError = null;
+}
+function addEx(){
+  editDraft.exercises.push({ id:uid(), name:'', sets:3, target:'8–10', perSide:false });
+  render();
+}
+function removeEx(i){
+  editDraft.exercises.splice(i,1);
+  render();
+}
+function moveEx(i, d){
+  const a = editDraft.exercises;
+  const j = i + d;
+  if (j < 0 || j >= a.length) return;
+  [a[i], a[j]] = [a[j], a[i]];
+  render();
+}
+function saveTemplate(){
+  const t = editDraft;
+  const kept = t.exercises.filter(e => e.name.trim());
+  if (!t.name.trim()){ editError = 'Ge mallen ett namn.'; render(); return; }
+  if (!kept.length){ editError = 'Lägg till minst en övning med namn.'; render(); return; }
+  t.exercises = kept;
+  delete t.isNew;
+  const all = getTemplates();
+  const idx = all.findIndex(x => x.id === t.id);
+  if (idx === -1) all.push(t); else all[idx] = t;
+  save(K.T, all);
+  editDraft = null;
+  go('edit');
+}
+function deleteTemplate(){
+  ask('Ta bort mallen? Historiken för redan körda pass finns kvar.', 'Ta bort mallen', () => {
+    save(K.T, getTemplates().filter(x => x.id !== editDraft.id));
+    editDraft = null;
+    go('edit');
+  });
+}
+
+/* ================= init ================= */
+window.App = { go, startRun, resume, tapSet, adj, clearSet, nextSet, finish, abort,
+  toggleSession, deleteSession, editTemplate, draftField, draftEx, addEx, removeEx, moveEx,
+  saveTemplate, deleteTemplate, modalYes, modalNo, recover };
+
+seed();
+render();
+
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>

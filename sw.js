@@ -1,6 +1,6 @@
 /* Styrka service worker
    Bumpa CACHE-namnet (v1 -> v2) när du deployar en ny version. */
-const CACHE = 'styrka-v1';
+const CACHE = 'styrka-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
